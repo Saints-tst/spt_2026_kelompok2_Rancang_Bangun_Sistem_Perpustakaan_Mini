@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Perpustakaan Mini</title>
+<style>
+:root{--bg:#f4f6f7;--card:#fff;--ink:#1c2733;--muted:#5d6b78;--line:#d9e0e5;--main:#14507a;--main-ink:#fff;--warn:#a4560a;--ok:#176b45;--bad:#b3261e}
+@media (prefers-color-scheme:dark){:root{--bg:#12181e;--card:#1a232c;--ink:#e6ecf1;--muted:#93a1ae;--line:#2c3945;--main:#5aa7da;--main-ink:#0c1620;--warn:#e0a05a;--ok:#5cc08f;--bad:#f2837c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,sans-serif}
+header{background:var(--main);color:var(--main-ink);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{margin:0;font-size:1.25rem;font-weight:700}
+main{max-width:1000px;margin:0 auto;padding:20px}
+nav{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+nav button{background:var(--card);color:var(--ink);border:1px solid var(--line);padding:8px 16px;border-radius:6px;cursor:pointer;font:inherit}
+nav button.on{background:var(--main);color:var(--main-ink);border-color:var(--main)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:18px;margin-bottom:16px}
+h2{margin:0 0 12px;font-size:1.1rem}
+label{display:block;font-size:.88rem;color:var(--muted);margin:10px 0 4px}
+input,select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+button.btn{background:var(--main);color:var(--main-ink);border:0;padding:8px 16px;border-radius:6px;cursor:pointer;font:inherit;margin-top:14px;margin-right:6px}
+button.btn.alt{background:transparent;color:var(--main);border:1px solid var(--main)}
+button.sm{padding:4px 10px;margin:0 4px 0 0;font-size:.85rem;border-radius:5px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.sm.danger{color:var(--bad);border-color:var(--bad)}
+header button.sm{background:transparent;color:var(--main-ink);border-color:var(--main-ink)}
+.tbl{overflow-x:auto;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:600}
+.tag{padding:2px 8px;border-radius:10px;font-size:.8rem;border:1px solid currentColor}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+.empty{color:var(--muted);padding:14px 0}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:8px;display:none;max-width:90%;z-index:9}
+#login{max-width:340px;margin:12vh auto}
+.hide{display:none}
+:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<section id="login" class="card">
+  <h2>Masuk petugas</h2>
+  <label for="u">Username</label><input id="u" autocomplete="username">
+  <label for="p">Password</label><input id="p" type="password" autocomplete="current-password">
+  <button class="btn" id="btnLogin">Masuk</button>
+  <p id="loginErr" class="bad"></p>
+</section>
+
+<div id="app" class="hide">
+<header>
+  <h1>Perpustakaan Mini</h1>
+  <button class="sm" id="btnLogout">Keluar</button>
+</header>
+<main>
+<nav id="tabs">
+  <button data-t="buku" class="on">Data buku</button>
+  <button data-t="pinjam">Pinjam buku</button>
+  <button data-t="riwayat">Riwayat dan pengembalian</button>
+</nav>
+
+<div id="t-buku">
+  <div class="card">
+    <h2>Cari buku</h2>
+    <input id="q" placeholder="Judul, penulis, atau kode buku" aria-label="Cari buku">
+    <div class="tbl" id="daftarBuku"></div>
+  </div>
+  <div class="card">
+    <h2 id="formJudul">Tambah buku</h2>
+    <input type="hidden" id="fId">
+    <div class="row">
+      <div><label for="fKode">Kode buku</label><input id="fKode"></div>
+      <div><label for="fJudul">Judul</label><input id="fJudul"></div>
+      <div><label for="fPenulis">Penulis</label><input id="fPenulis"></div>
+      <div><label for="fPenerbit">Penerbit</label><input id="fPenerbit"></div>
+      <div><label for="fTahun">Tahun</label><input id="fTahun" type="number"></div>
+      <div><label for="fStok">Stok</label><input id="fStok" type="number" min="0" value="1"></div>
+    </div>
+    <button class="btn" id="btnSimpan">Simpan buku</button>
+    <button class="btn alt" id="btnBatal">Batal ubah</button>
+  </div>
+</div>
+
+<div id="t-pinjam" class="hide">
+  <div class="card">
+    <h2>Pinjam buku</h2>
+    <div class="row">
+      <div><label for="pAnggota">ID anggota</label><input id="pAnggota" type="number" min="1"></div>
+      <div><label for="pBuku">Buku yang tersedia</label><select id="pBuku"></select></div>
+    </div>
+    <button class="btn" id="btnPinjam">Catat peminjaman</button>
+    <p id="hasilPinjam"></p>
+  </div>
+</div>
+
+<div id="t-riwayat" class="hide">
+  <div class="card">
+    <h2>Riwayat anggota</h2>
+    <div class="row">
+      <div><label for="rAnggota">ID anggota</label><input id="rAnggota" type="number" min="1"></div>
+    </div>
+    <button class="btn" id="btnRiwayat">Tampilkan riwayat</button>
+    <p id="hasilKembali"></p>
+    <div class="tbl" id="daftarRiwayat"></div>
+  </div>
+</div>
+</main>
+</div>
+
+<div id="toast" role="status"></div>
+
+<script>
+// ===== PENGATURAN: ganti alamat saat server dipindah ke perangkat lain =====
+const S1 = "http://localhost:5001";   // Server 1 (data buku)
+const S2 = "http://localhost:5002";   // Server 2 (peminjaman dan denda)
+const PETUGAS = { user: "admin", pass: "perpus123" };   // akun sementara (prototipe)
+// ===========================================================================
+
+const $ = id => document.getElementById(id);
+const rp = n => "Rp" + Number(n || 0).toLocaleString("id-ID");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function toast(msg){
+  const t = $("toast"); t.textContent = msg; t.style.display = "block";
+  clearTimeout(toast.h); toast.h = setTimeout(() => t.style.display = "none", 3500);
+}
+
+async function api(url, method = "GET", body){
+  try{
+    const r = await fetch(url, {
+      method,
+      headers: body ? {"Content-Type":"application/json"} : {},
+      body: body ? JSON.stringify(body) : undefined
+    });
+    const data = await r.json().catch(() => ({}));
+    return {ok: r.ok, data};
+  }catch(e){
+    return {ok:false, data:{error:"Server tidak dapat dihubungi. Pastikan server sudah dijalankan."}};
+  }
+}
+
+// ----- Login -----
+function masuk(){ $("login").classList.add("hide"); $("app").classList.remove("hide"); muatBuku(); }
+$("btnLogin").onclick = () => {
+  if($("u").value === PETUGAS.user && $("p").value === PETUGAS.pass){
+    try{ sessionStorage.setItem("login","1"); }catch(e){}
+    masuk();
+  } else $("loginErr").textContent = "Username atau password salah.";
+};
+$("p").addEventListener("keydown", e => { if(e.key === "Enter") $("btnLogin").click(); });
+$("btnLogout").onclick = () => {
+  try{ sessionStorage.removeItem("login"); }catch(e){}
+  location.reload();
+};
+try{ if(sessionStorage.getItem("login")) masuk(); }catch(e){}
+
+// ----- Tab -----
+$("tabs").onclick = e => {
+  const t = e.target.dataset.t; if(!t) return;
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b === e.target));
+  ["buku","pinjam","riwayat"].forEach(x => $("t-"+x).classList.toggle("hide", x !== t));
+  if(t === "pinjam") isiPilihanBuku();
+};
+
+// ----- Data buku (Server 1) -----
+let cacheBuku = [];
+async function muatBuku(){
+  const q = $("q").value.trim();
+  const r = await api(`${S1}/buku?q=${encodeURIComponent(q)}`);
+  if(!r.ok){ $("daftarBuku").innerHTML = `<p class="bad">${esc(r.data.error || "Gagal memuat buku")}</p>`; return; }
+  cacheBuku = r.data;
+  if(!cacheBuku.length){ $("daftarBuku").innerHTML = `<p class="empty">Belum ada buku yang cocok. Ubah kata kunci atau tambah buku di bawah.</p>`; return; }
+  $("daftarBuku").innerHTML = `<table><tr><th>Kode</th><th>Judul</th><th>Penulis</th><th>Tahun</th><th>Stok</th><th>Status</th><th>Aksi</th></tr>` +
+    cacheBuku.map(b => `<tr><td>${esc(b.kode_buku)}</td><td>${esc(b.judul)}</td><td>${esc(b.penulis)}</td><td>${esc(b.tahun)}</td><td>${b.stok}</td>
+      <td><span class="tag ${b.stok>0?'ok':'bad'}">${b.stok>0?'tersedia':'habis'}</span></td>
+      <td><button class="sm" onclick="ubahBuku(${b.id_buku})">Ubah</button><button class="sm danger" onclick="hapusBuku(${b.id_buku})">Hapus</button></td></tr>`).join("") + `</table>`;
+}
+$("q").addEventListener("input", () => { clearTimeout(muatBuku.h); muatBuku.h = setTimeout(muatBuku, 300); });
+
+function resetForm(){
+  ["fId","fKode","fJudul","fPenulis","fPenerbit","fTahun"].forEach(i => $(i).value = "");
+  $("fStok").value = 1; $("formJudul").textContent = "Tambah buku";
+}
+window.ubahBuku = id => {
+  const b = cacheBuku.find(x => x.id_buku === id); if(!b) return;
+  $("fId").value = b.id_buku; $("fKode").value = b.kode_buku; $("fJudul").value = b.judul;
+  $("fPenulis").value = b.penulis || ""; $("fPenerbit").value = b.penerbit || "";
+  $("fTahun").value = b.tahun || ""; $("fStok").value = b.stok;
+  $("formJudul").textContent = "Ubah buku"; $("fKode").scrollIntoView({behavior:"smooth"});
+};
+window.hapusBuku = async id => {
+  if(!confirm("Hapus buku ini?")) return;
+  const r = await api(`${S1}/buku/${id}`, "DELETE");
+  toast(r.ok ? "Buku dihapus" : (r.data.error || "Gagal menghapus"));
+  if(r.ok) muatBuku();
+};
+$("btnBatal").onclick = resetForm;
+$("btnSimpan").onclick = async () => {
+  const id = $("fId").value;
+  const body = {
+    kode_buku: $("fKode").value.trim(), judul: $("fJudul").value.trim(),
+    penulis: $("fPenulis").value.trim(), penerbit: $("fPenerbit").value.trim(),
+    tahun: $("fTahun").value || null, stok: Number($("fStok").value || 0)
+  };
+  if(!body.kode_buku || !body.judul){ toast("Kode buku dan judul wajib diisi"); return; }
+  const r = id ? await api(`${S1}/buku/${id}`, "PUT", body) : await api(`${S1}/buku`, "POST", body);
+  toast(r.ok ? (id ? "Buku diperbarui" : "Buku ditambahkan") : (r.data.error || "Gagal menyimpan"));
+  if(r.ok){ resetForm(); muatBuku(); }
+};
+
+// ----- Pinjam (Server 2) -----
+async function isiPilihanBuku(){
+  const r = await api(`${S1}/buku?q=`);
+  if(!r.ok){ $("pBuku").innerHTML = ""; toast(r.data.error || "Gagal memuat buku"); return; }
+  const ada = r.data.filter(b => b.stok > 0);
+  $("pBuku").innerHTML = ada.length
+    ? ada.map(b => `<option value="${b.id_buku}">${esc(b.kode_buku)} - ${esc(b.judul)} (stok ${b.stok})</option>`).join("")
+    : `<option value="">Tidak ada buku tersedia</option>`;
+}
+$("btnPinjam").onclick = async () => {
+  const id_anggota = Number($("pAnggota").value), id_buku = Number($("pBuku").value);
+  if(!id_anggota || !id_buku){ toast("Isi ID anggota dan pilih buku"); return; }
+  const r = await api(`${S2}/pinjam`, "POST", {id_anggota, id_buku});
+  const el = $("hasilPinjam");
+  if(r.ok){
+    el.className = "ok";
+    el.textContent = `${r.data.anggota} meminjam buku. Nomor transaksi ${r.data.id_peminjaman}, jatuh tempo ${r.data.tgl_jatuh_tempo}.`;
+    isiPilihanBuku();
+  } else { el.className = "bad"; el.textContent = r.data.error || "Peminjaman gagal"; }
+};
+
+// ----- Riwayat, kembali, denda (Server 2) -----
+async function muatRiwayat(){
+  const id = Number($("rAnggota").value);
+  if(!id){ toast("Isi ID anggota"); return; }
+  const r = await api(`${S2}/riwayat/${id}`);
+  if(!r.ok){ $("daftarRiwayat").innerHTML = `<p class="bad">${esc(r.data.error || "Gagal memuat riwayat")}</p>`; return; }
+  if(!r.data.length){ $("daftarRiwayat").innerHTML = `<p class="empty">Anggota ini belum pernah meminjam.</p>`; return; }
+  $("daftarRiwayat").innerHTML = `<table><tr><th>No</th><th>Buku</th><th>Pinjam</th><th>Jatuh tempo</th><th>Status</th><th>Denda</th><th>Aksi</th></tr>` +
+    r.data.map(x => {
+      let aksi = "";
+      if(x.status === "dipinjam") aksi = `<button class="sm" onclick="kembalikan(${x.id_peminjaman})">Kembalikan</button>`;
+      else if(x.id_denda && x.status_bayar === "belum") aksi = `<button class="sm" onclick="bayar(${x.id_denda})">Lunasi denda</button>`;
+      const denda = x.denda ? `${rp(x.denda)} <span class="tag ${x.status_bayar==='lunas'?'ok':'warn'}">${esc(x.status_bayar)}</span>` : "-";
+      return `<tr><td>${x.id_peminjaman}</td><td>${esc(x.judul)}</td><td>${esc(x.tgl_pinjam)}</td><td>${esc(x.tgl_jatuh_tempo)}</td>
+        <td><span class="tag ${x.status==='dipinjam'?'warn':'ok'}">${esc(x.status)}</span></td><td>${denda}</td><td>${aksi}</td></tr>`;
+    }).join("") + `</table>`;
+}
+$("btnRiwayat").onclick = muatRiwayat;
+window.kembalikan = async id => {
+  const r = await api(`${S2}/kembali`, "POST", {id_peminjaman: id});
+  const el = $("hasilKembali");
+  if(r.ok){
+    el.className = r.data.denda > 0 ? "warn" : "ok";
+    el.textContent = r.data.denda > 0
+      ? `Dikembalikan terlambat ${r.data.keterlambatan_hari} hari. Denda ${rp(r.data.denda)}.`
+      : "Dikembalikan tepat waktu. Tidak ada denda.";
+    if(r.data.peringatan) el.textContent += " " + r.data.peringatan;
+    muatRiwayat();
+  } else { el.className = "bad"; el.textContent = r.data.error || "Pengembalian gagal"; }
+};
+window.bayar = async id => {
+  const r = await api(`${S2}/denda/${id}/bayar`, "PUT");
+  toast(r.ok ? "Denda dilunasi" : (r.data.error || "Gagal melunasi"));
+  if(r.ok) muatRiwayat();
+};
+</script>
+</body>
+</html>

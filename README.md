@@ -46,7 +46,7 @@ Tabel utama: `buku`, `anggota`, `peminjaman`, `pengembalian`, `denda`
 Stack disesuaikan dengan kemampuan tim.
 
 - **DBMS:** MySQL / MariaDB / PostgreSQL
-- **Server & Client:** _(isi sesuai teknologi yang dipakai)_
+- **Server & Client:** Python 3 dan Browser
 
 ## Rencana Pengujian
 
@@ -64,11 +64,10 @@ Koneksi client–server, CRUD buku, peminjaman, pengembalian tepat waktu, pengem
 
 | Nama | NIM | Tugas |
 |------|-----|-------|
-| Muhammad Fayyadh Alghifari | 23210010 | Server 1 (data buku) |
-| Asmarudin | 23210133 | Server 2 (pinjam, kembali, denda) |
-| Darmawansya | 23210080 | Client (antarmuka) |
-| Rahmad Fadli | 23210129 | Database & konfigurasi jaringan |
-| Maulidzhan Syam Ikraam | 23210095 | Pengujian, keamanan, dokumentasi |
+| Darmawansya | 23210080 | Server 1 (data buku) dan Server 2 (pinjam, kembali, denda) |
+| Muhammad Fayyadh Alghifari | 23210010 | Client (antarmuka) |
+| Maulidzhan Syam Ikraam | 23210095 | Database & konfigurasi jaringan |
+| Rahmad Fadli | 23210129 | Pengujian, keamanan, dokumentasi |
 
 ---
 
